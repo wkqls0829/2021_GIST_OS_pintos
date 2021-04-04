@@ -33,6 +33,9 @@ PATH: /usr/sbin
 PATH: /usr/bin
 PATH: /sbin
 PATH: /bin
+PATH: /app/src/utils
+PATH: /app/src/utils
+PATH: /app/src/utils
 
 
 ## ----------- ##
@@ -423,7 +426,7 @@ configure:6456: checking for strip
 configure:6472: found /usr/bin/strip
 configure:6483: result: strip
 configure:6547: checking for file
-configure:6603: result: no
+configure:6600: result: /usr/bin/file
 configure:6755: checking if gcc static flag  works
 configure:6778: result: yes
 configure:6800: checking if gcc supports -fno-rtti -fno-exceptions
@@ -441,7 +444,7 @@ configure:7090: checking if gcc supports -c -o file.o
 configure:7118: gcc -c -g -O2  -o out/conftest2.o conftest.c >&5
 configure:7122: $? = 0
 configure:7142: result: yes
-configure:7168: checking whether the gcc linker (/usr/bin/ld) supports shared libraries
+configure:7168: checking whether the gcc linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
 configure:7958: result: yes
 configure:7984: checking whether -lc should be explicitly linked in
 configure:7989: gcc -c -g -O2  conftest.c >&5
@@ -457,7 +460,7 @@ configure:8594: checking whether stripping libraries is possible
 configure:8599: result: yes
 configure:8697: checking for shl_load
 configure:8697: gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccODoUHg.o: In function `main':
+/tmp/ccwv1GyB.o: In function `main':
 /app/bochs-2.6.2/conftest.c:54: undefined reference to `shl_load'
 collect2: ld returned 1 exit status
 configure:8697: $? = 1
@@ -563,7 +566,7 @@ configure: failed program was:
 configure:8735: result: no
 configure:8740: checking for dlopen
 configure:8740: gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccqGtZqq.o: In function `main':
+/tmp/ccWDeljK.o: In function `main':
 /app/bochs-2.6.2/conftest.c:54: undefined reference to `dlopen'
 collect2: ld returned 1 exit status
 configure:8740: $? = 1
@@ -650,10 +653,10 @@ configure:9177: checking whether to build static libraries
 configure:9181: result: no
 configure:9272: creating libtool
 configure:9812: checking for ld used by g++
-configure:9879: result: /usr/bin/ld
-configure:9886: checking if the linker (/usr/bin/ld) is GNU ld
+configure:9879: result: /usr/bin/ld -m elf_x86_64
+configure:9886: checking if the linker (/usr/bin/ld -m elf_x86_64) is GNU ld
 configure:9901: result: yes
-configure:9952: checking whether the g++ linker (/usr/bin/ld) supports shared libraries
+configure:9952: checking whether the g++ linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
 configure:10722: result: yes
 configure:10744: g++ -c -g -O2  conftest.cc >&5
 configure:10747: $? = 0
@@ -667,7 +670,7 @@ configure:11160: checking if g++ supports -c -o file.o
 configure:11188: g++ -c -g -O2  -o out/conftest2.o conftest.cc >&5
 configure:11192: $? = 0
 configure:11212: result: yes
-configure:11238: checking whether the g++ linker (/usr/bin/ld) supports shared libraries
+configure:11238: checking whether the g++ linker (/usr/bin/ld -m elf_x86_64) supports shared libraries
 configure:11263: result: yes
 configure:11334: checking dynamic linker characteristics
 configure:11856: result: GNU/Linux ld.so
@@ -1869,7 +1872,7 @@ configure:20676: $? = 0
 configure:20676: result: yes
 configure:20688: checking for strrev
 configure:20688: gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccFybeqd.o: In function `main':
+/tmp/ccBnhDsp.o: In function `main':
 /app/bochs-2.6.2/conftest.c:110: undefined reference to `strrev'
 collect2: ld returned 1 exit status
 configure:20688: $? = 1
@@ -1990,7 +1993,7 @@ configure: failed program was:
 configure:20688: result: no
 configure:20700: checking for stricmp
 configure:20700: gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/cczqx5Vh.o: In function `main':
+/tmp/ccVFKsOt.o: In function `main':
 /app/bochs-2.6.2/conftest.c:110: undefined reference to `stricmp'
 collect2: ld returned 1 exit status
 configure:20700: $? = 1
@@ -2150,7 +2153,7 @@ configure:20830: $? = 0
 configure:20830: result: yes
 configure:20842: checking for fseek64
 configure:20842: gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccFQrk9R.o: In function `main':
+/tmp/cc8Me0hf.o: In function `main':
 /app/bochs-2.6.2/conftest.c:123: undefined reference to `fseek64'
 collect2: ld returned 1 exit status
 configure:20842: $? = 1
@@ -2548,7 +2551,7 @@ configure:21081: result: yes
 configure:21104: checking for cos
 configure:21104: gcc -o conftest -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES  -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES  conftest.c  >&5
 conftest.c:128:6: warning: conflicting types for built-in function 'cos' [enabled by default]
-/tmp/ccbykL5A.o: In function `main':
+/tmp/ccl1oMXX.o: In function `main':
 /app/bochs-2.6.2/conftest.c:139: undefined reference to `cos'
 collect2: ld returned 1 exit status
 configure:21104: $? = 1
@@ -2699,7 +2702,7 @@ configure:21104: result: no
 configure:21115: checking for floor
 configure:21115: gcc -o conftest -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES  -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES  conftest.c  >&5
 conftest.c:128:6: warning: conflicting types for built-in function 'floor' [enabled by default]
-/tmp/ccmG5BvF.o: In function `main':
+/tmp/ccjujfq2.o: In function `main':
 /app/bochs-2.6.2/conftest.c:139: undefined reference to `floor'
 collect2: ld returned 1 exit status
 configure:21115: $? = 1
@@ -4103,7 +4106,7 @@ configure: failed program was:
 configure:25150: result: no
 configure:25097: checking whether pthreads work without any flags
 configure:25141: gcc -o conftest -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES   -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES  conftest.c   -lm >&5
-/tmp/ccK5he3R.o: In function `main':
+/tmp/ccrRMNag.o: In function `main':
 /app/bochs-2.6.2/conftest.c:162: undefined reference to `pthread_join'
 /app/bochs-2.6.2/conftest.c:163: undefined reference to `__pthread_register_cancel'
 /app/bochs-2.6.2/conftest.c:164: undefined reference to `pthread_create'
@@ -4864,7 +4867,9 @@ config.status:1114: creating build/win32/nsis/Makefile
 config.status:1114: creating build/win32/nsis/bochs.nsi
 config.status:1114: creating host/linux/pcidev/Makefile
 config.status:1114: creating config.h
+config.status:1284: config.h is unchanged
 config.status:1114: creating ltdlconf.h
+config.status:1284: ltdlconf.h is unchanged
 
 ## ---------------- ##
 ## Cache variables. ##
@@ -5033,7 +5038,8 @@ lt_cv_file_magic_test_file='/lib/libc.so* /lib/libc-*.so'
 lt_cv_ld_reload_flag=-r
 lt_cv_objdir=.libs
 lt_cv_path_LD=/usr/bin/ld
-lt_cv_path_LDCXX=/usr/bin/ld
+lt_cv_path_LDCXX='/usr/bin/ld -m elf_x86_64'
+lt_cv_path_MAGIC_CMD=/usr/bin/file
 lt_cv_path_NM='/usr/bin/nm -B'
 lt_cv_path_SED=/bin/sed
 lt_cv_prog_compiler_c_o=yes
