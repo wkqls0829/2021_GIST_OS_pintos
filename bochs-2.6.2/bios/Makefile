@@ -30,7 +30,7 @@ srcdir = .
 
 SHELL = /bin/bash
 
-MAKE=make
+
 
 CXX = g++
 CXXFLAGS = -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES
