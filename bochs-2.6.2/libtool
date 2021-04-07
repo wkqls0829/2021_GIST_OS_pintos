@@ -44,7 +44,7 @@ available_tags=" CXX"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host 5e6ac7694eb9:
+# Libtool was configured on host 014a5cc07ac1:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -88,7 +88,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld"
+LD="/usr/bin/ld -m elf_x86_64"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -100,7 +100,7 @@ NM="/usr/bin/nm -B"
 STRIP="strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
-MAGIC_CMD=:
+MAGIC_CMD=/usr/bin/file
 
 # Used on cygwin: DLL creation program.
 DLLTOOL="dlltool"
@@ -316,7 +316,7 @@ variables_saved_for_relink="PATH  LD_RUN_PATH GCC_EXEC_PREFIX COMPILER_PATH LIBR
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec=" /usr/lib/gcc/x86_64-linux-gnu/4.6/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/4.6/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../../x86_64-linux-gnu/lib/../lib/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../x86_64-linux-gnu/4.6/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../x86_64-linux-gnu/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../../lib/ /lib/x86_64-linux-gnu/4.6/ /lib/x86_64-linux-gnu/ /lib/../lib/ /usr/lib/x86_64-linux-gnu/4.6/ /usr/lib/x86_64-linux-gnu/ /usr/lib/../lib/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../../x86_64-linux-gnu/lib/ /usr/lib/gcc/x86_64-linux-gnu/4.6/../../../ /lib/ /usr/lib/"
+sys_lib_search_path_spec=" /usr/lib/gcc/x86_64-linux-gnu/4.4.7/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/4.4.7/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../../x86_64-linux-gnu/lib/x86_64-linux-gnu/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../../x86_64-linux-gnu/lib/../lib/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../x86_64-linux-gnu/4.4.7/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../x86_64-linux-gnu/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../../lib/ /lib/x86_64-linux-gnu/4.4.7/ /lib/x86_64-linux-gnu/ /lib/../lib/ /usr/lib/x86_64-linux-gnu/4.4.7/ /usr/lib/x86_64-linux-gnu/ /usr/lib/../lib/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../../x86_64-linux-gnu/lib/ /usr/lib/gcc/x86_64-linux-gnu/4.4.7/../../../ /lib/ /usr/lib/"
 
 # Run-time system search path for libraries
 sys_lib_dlsearch_path_spec="/lib /usr/lib"
@@ -6665,7 +6665,7 @@ build_old_libs=`case $build_libtool_libs in yes) $echo no;; *) $echo yes;; esac`
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host 5e6ac7694eb9:
+# Libtool was configured on host 014a5cc07ac1:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -6709,7 +6709,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld"
+LD="/usr/bin/ld -m elf_x86_64"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -6721,7 +6721,7 @@ NM="/usr/bin/nm -B"
 STRIP="strip"
 
 # Used to examine libraries when file_magic_cmd begins "file"
-MAGIC_CMD=:
+MAGIC_CMD=/usr/bin/file
 
 # Used on cygwin: DLL creation program.
 DLLTOOL="dlltool"

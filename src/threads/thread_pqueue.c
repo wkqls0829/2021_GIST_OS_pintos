@@ -1,11 +1,12 @@
 #include "threads/thread_pqueue.h"
 
+
 #include <stdlib.h>
 
 typedef int(*compare)(const struct thread* thread1, const struct thread* thread2);
 
 int compare_sleeptime(const struct thread* thread1, const struct thread* thread2){
-    return thread1->sleepdue - thread2->sleepdue;
+    return thread1->sleep_due - thread2->sleep_due;
 }
 
 struct thread_pqueue {
@@ -47,12 +48,12 @@ static void fall(struct thread_pqueue* tq, int k) {
 
 static struct thread** array_resize(struct thread** array, int newlength) {
     // reallocate array to new size
-    return realloc(array, newlength * sizeof(struct thread*));
+    return (struct thread**)realloc(array, newlength * sizeof(struct thread*));
 }
 
 struct thread_pqueue* thread_pqueue_init(int(*compare)(const struct thread* thread1, const struct thread* thread2)) {
-    struct thread_pqueue* tq = malloc(sizeof(struct thread_pqueue));
-    tq->array = malloc(sizeof(struct thread*) * (initial_size + 1));
+    struct thread_pqueue* tq = (struct thread_pqueue*)malloc(sizeof(struct thread_pqueue));
+    tq->array = (struct thread**)malloc(sizeof(struct thread*) * (initial_size + 1));
     tq->capacity = initial_size;
     tq->n = 0;
     tq->cmp = compare;

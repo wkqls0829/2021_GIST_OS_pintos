@@ -128,7 +128,7 @@ void thread_exit (void) NO_RETURN;
 void thread_yield (void);
 
 /* made by jabin */
-void thread_sleep (int65_t sleep_due);
+void thread_sleep (int64_t sleep_due);
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);

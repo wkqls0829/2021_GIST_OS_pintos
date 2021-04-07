@@ -26,7 +26,7 @@
 static struct list ready_list;
 
 /* List for sleepint */
-static struct thread_pqueue sleep_list;
+static struct thread_pqueue* sleep_list;
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -138,6 +138,16 @@ thread_tick (void)
 #endif
   else
     kernel_ticks++;
+
+  /* check sleeping beauties */
+  int64_t now = timer_ticks();
+  while(!thread_pqueue_empty(sleep_list)){
+      if(thread_pqueue_peek(sleep_list)->sleep_due <= now){
+          struct thread* slept = thread_pqueue_top(sleep_list);
+          thread_unblock(slept);
+      }
+  }
+
 
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
@@ -332,7 +342,8 @@ void
 thread_sleep (int64_t sleep_due)
 {
     struct thread *cur = thread_current();
-    cur->sleep
+    cur->sleep_due = sleep_due;
+    thread_pqueue_insert(sleep_list, cur);
 
     thread_block();
 }
