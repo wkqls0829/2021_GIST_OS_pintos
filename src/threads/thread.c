@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/thread_pqueue.c"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -23,6 +24,9 @@
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
+
+/* List for sleepint */
+static struct thread_pqueue sleep_list;
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -93,6 +97,7 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
 
+  sleep_list = thread_pqueue_init(compare_sleeptime);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
@@ -320,6 +325,16 @@ thread_yield (void)
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
+}
+
+/* sleeps thread */
+void
+thread_sleep (int64_t sleep_due)
+{
+    struct thread *cur = thread_current();
+    cur->sleep
+
+    thread_block();
 }
 
 /* Invoke function 'func' on all threads, passing along 'aux'.
