@@ -26,7 +26,7 @@
 static struct list ready_list;
 
 /* List for sleepint */
-static struct thread_pqueue* sleep_list;
+static struct thread_pqueue sleep_list;
 
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
@@ -96,13 +96,14 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+  thread_pqueue_init(&sleep_list, compare_sleeptime);
 
-  sleep_list = thread_pqueue_init(compare_sleeptime);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -139,19 +140,28 @@ thread_tick (void)
   else
     kernel_ticks++;
 
-  /* check sleeping beauties */
-  int64_t now = timer_ticks();
-  while(!thread_pqueue_empty(sleep_list)){
-      if(thread_pqueue_peek(sleep_list)->sleep_due <= now){
-          struct thread* slept = thread_pqueue_top(sleep_list);
-          thread_unblock(slept);
-      }
-  }
+  wake_threads();
 
 
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
+}
+
+/* wakes threads */
+void wake_threads(){
+  /* check sleeping beauties */
+  int64_t now = timer_ticks();
+  while(!thread_pqueue_empty(&sleep_list)){
+      //printf("tick tock %d until %d \n", thread_pqueue_peek(&sleep_list)->sleep_due, now);
+      if(thread_pqueue_peek(&sleep_list)->sleep_due <= now){
+          struct thread* slept = thread_pqueue_top(&sleep_list);
+          thread_unblock(slept);
+      } else {
+          break;
+      }
+  }
+
 }
 
 /* Prints thread statistics. */
@@ -342,10 +352,14 @@ void
 thread_sleep (int64_t sleep_due)
 {
     struct thread *cur = thread_current();
+    printf("sleeping %ld\n", sleep_due);
     cur->sleep_due = sleep_due;
-    thread_pqueue_insert(sleep_list, cur);
+    thread_pqueue_insert(&sleep_list, cur);
 
+    enum intr_level old_level;
+    old_level = intr_disable();
     thread_block();
+    intr_set_level (old_level);
 }
 
 /* Invoke function 'func' on all threads, passing along 'aux'.
@@ -477,6 +491,16 @@ running_thread (void)
 static bool
 is_thread (struct thread *t)
 {
+    bool result = t != NULL && t->magic == THREAD_MAGIC;
+    if(!result){
+        if(t == NULL){ 
+            printf("Why null?????\n");
+        } else {
+            printf("magic %d\n", t->magic);
+        }
+    }
+    
+
   return t != NULL && t->magic == THREAD_MAGIC;
 }
 

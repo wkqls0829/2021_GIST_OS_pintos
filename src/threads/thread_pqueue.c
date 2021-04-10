@@ -1,7 +1,7 @@
 #include "threads/thread_pqueue.h"
 
 
-#include <stdlib.h>
+#include <stdio.h>
 
 typedef int(*compare)(const struct thread* thread1, const struct thread* thread2);
 
@@ -51,13 +51,11 @@ static struct thread** array_resize(struct thread** array, int newlength) {
     return (struct thread**)realloc(array, newlength * sizeof(struct thread*));
 }
 
-struct thread_pqueue* thread_pqueue_init(int(*compare)(const struct thread* thread1, const struct thread* thread2)) {
-    struct thread_pqueue* tq = (struct thread_pqueue*)malloc(sizeof(struct thread_pqueue));
-    tq->array = (struct thread**)malloc(sizeof(struct thread*) * (initial_size + 1));
+void thread_pqueue_init(struct thread_pqueue* tq, int(*compare)(const struct thread* thread1, const struct thread* thread2)) {
+    tq->array = NULL;
     tq->capacity = initial_size;
     tq->n = 0;
     tq->cmp = compare;
-    return tq;
 }
 
 void thread_pqueue_free(struct thread_pqueue* tq) {
@@ -69,6 +67,11 @@ int thread_pqueue_empty(struct thread_pqueue* tq) {
 }
 
 void thread_pqueue_insert(struct thread_pqueue* tq, struct thread* th) {
+    if (tq->array == NULL){
+        tq->array = (struct thread**)malloc(sizeof(struct thread*) * (initial_size + 1));
+        tq->capacity = initial_size;
+        tq->n = 0;
+    }
 
     if (tq->n == tq->capacity) {
         tq->capacity *= 2;

@@ -87,11 +87,15 @@ timer_elapsed (int64_t then)
 /* Sleeps for approximately TICKS timer ticks.  Interrupts must
    be turned on. */
 void
-timer_sleep (int64_t ticks) 
+timer_sleep (int64_t sticks) 
 {
+  enum intr_level old_level = intr_disable ();
   int64_t start = timer_ticks ();
-
-  thread_sleep(start+ticks);
+    printf("%ld %ld\n", start, sticks);
+    printf("fuck you %ld\n", start - sticks);
+    printf("%ld\n", start + sticks);
+  intr_set_level (old_level);
+  thread_sleep(start+sticks);
 
 /*  ASSERT (intr_get_level () == INTR_ON);
   while (timer_elapsed (start) < ticks) 

@@ -252,7 +252,6 @@ sub set_disk {
 	$parts{$role}{SECTORS} = $pt{$role}{SECTORS};
     }
 }
-
 # Locates the files used to back each of the virtual disks,
 # and creates temporary disks.
 sub find_disks {
