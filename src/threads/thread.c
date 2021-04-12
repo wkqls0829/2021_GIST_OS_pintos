@@ -24,6 +24,9 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+/*List of processes in Thread_Blocked state*/
+static struct list sleep_list;
+
 /* List of all processes.  Processes are added to this list
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
@@ -49,6 +52,9 @@ struct kernel_thread_frame
 static long long idle_ticks;    /* # of timer ticks spent idle. */
 static long long kernel_ticks;  /* # of timer ticks in kernel threads. */
 static long long user_ticks;    /* # of timer ticks in user programs. */
+
+/* next wakeup tick for check earlist thread to wake up*/
+static int64_t next_wakeup_tick;
 
 /* Scheduling. */
 #define TIME_SLICE 4            /* # of timer ticks to give each thread. */
@@ -92,6 +98,8 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+  /* Add list_init for sleep list*/
+  list_init (&sleep_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -585,3 +593,64 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+void set_next_wakeup_tick(int64_t ticks){
+  // 가장 작은 tick으로 업데이트 해준다.
+  next_wakeup_tick = (next_wakeup_tick < ticks) ? next_wakeup_tick : ticks;
+}
+
+int64_t get_next_wakeup_tick(void){
+  // 다음에 일어나야할 thread의 tick을 반환해준다.
+  return next_wakeup_tick;
+}
+
+void thread_sleep(int64_t ticks){
+  // 현재 thread를 받는다.
+	struct thread *cur;
+  
+  // interrupt 금지시키고 이전 interrupt level을 저장한다.
+  enum intr_level old_level;
+	old_level = intr_disable();
+  
+  // idle thread가 sleep될 경우 예외처리
+  cur = thread_current();
+  ASSERT(cur!=idle_thread);
+  
+  // wakeup_tick 값을 setter로 업데이트
+  set_next_wakeup_tick(cur->wakeup_tick = ticks);
+  
+  // sleep_list에 현재 thread를 넣어준다.
+  list_push_back(&sleep_list, &cur->elem);
+
+  // block state로 만들어준다.
+  thread_block();
+  
+  // interrupt를 다시 원상복귀
+  intr_set_level(old_level);
+}
+
+void thread_awake(int64_t tick){
+  //thread에 변화가 있으므로 초기에 최댓값으로 초기화해준다.
+	next_wakeup_tick = INT64_MAX;
+  // sleep_list의 맨 앞을 처음 시작점으로 지정.
+  struct list_elem *e = list_begin(&sleep_list);
+  
+  // sleep_list 마지막까지 순회해준다.
+  for(e; e != list_end(&sleep_list);){
+    // 멤버변수의 주소로 객체의 주소, 즉, thread의 주소를 알 수 있다.
+    struct thread *t = list_entry(e, struct thread, elem);
+    
+    if(t->wakeup_tick <= tick){
+      // sleep_list에서 현재 thread를 제거한다.
+      e = list_remove(&t->elem);
+      thread_unblock(t);
+    }
+    else{
+      // 다음 순회를 위해 다음 element를 지정한다.
+      e = list_next(e);
+      set_next_wakeup_tick(t->wakeup_tick);
+    }
+  }
+}
+
+
