@@ -96,6 +96,12 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+    /* priority donation variables */
+    int original_priority;
+    struct list donated;
+    struct list_elem donator;
+    struct lock *wait_for_lock;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -146,5 +152,16 @@ void set_next_wakeup_tick(int64_t ticks);
 int64_t get_next_wakeup_tick(void);
 void thread_sleep(int64_t ticks); 
 void thread_awake(int64_t ticks);
+
+/* functions for priority donations */
+void donate_priority(void);
+void free_lock(struct lock*);
+void refresh_priority(void);
+
+/* Additionally implemented for priority scheduling*/
+void test_max_priority (void);
+// 실제 scheduling을 해주는 함수, 현재 실행중인 thread의 priority와 ready_list에서 현재 가장 높은 priority를 비교해서 thread를 yield()할지 말지 결정한다. 
+bool thread_priority_cmp (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+// thread들의 우선순위를 비교하는 함수.
 
 #endif /* threads/thread.h */
