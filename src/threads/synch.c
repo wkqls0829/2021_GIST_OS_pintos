@@ -68,7 +68,8 @@ sema_down (struct semaphore *sema)
   old_level = intr_disable ();
   while (sema->value == 0) 
     {
-      list_push_back (&sema->waiters, &thread_current ()->elem);
+      // priority 순서대로 waiters list에 삽입한다. 
+      list_insert_ordered(&sema->waiters, &thread_current()->elem, &thread_priority_cmp, 0);
       thread_block ();
     }
   sema->value--;
@@ -113,10 +114,15 @@ sema_up (struct semaphore *sema)
   ASSERT (sema != NULL);
 
   old_level = intr_disable ();
-  if (!list_empty (&sema->waiters)) 
-    thread_unblock (list_entry (list_pop_front (&sema->waiters),
-                                struct thread, elem));
+  if (!list_empty (&sema->waiters)){
+    // semaphore의 waiters list를 priority 순서로 정렬
+    list_sort(&sema->waiters, &thread_priority_cmp, 0);
+    thread_unblock (list_entry (list_pop_front (&sema->waiters), struct thread, elem));
+  
+  } 
   sema->value++;
+  // unblock으로 현재 실행중인 thread보다 priority가 높을 수 있으므로.
+  test_max_priority();
   intr_set_level (old_level);
 }
 
@@ -295,7 +301,8 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   
   sema_init (&waiter.semaphore, 0);
-  list_push_back (&cond->waiters, &waiter.elem);
+  // FIFO제거하고, Priority 순서로 Condition variable의 waiters list가 정렬되도록 수정.
+  list_insert_ordered(&cond->waiters, &waiter.elem, &semaphore_priority_cmp, 0);
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);
@@ -316,9 +323,11 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
 
-  if (!list_empty (&cond->waiters)) 
-    sema_up (&list_entry (list_pop_front (&cond->waiters),
-                          struct semaphore_elem, elem)->semaphore);
+  if (!list_empty (&cond->waiters)) {
+    // condition variable의 waiter list를 priority 순서로 정렬
+    list_sort(&cond->waiters, &semaphore_priority_cmp, 0);
+    sema_up (&list_entry (list_pop_front (&cond->waiters), struct semaphore_elem, elem)->semaphore);
+  }
 }
 
 /* Wakes up all threads, if any, waiting on COND (protected by
@@ -335,4 +344,17 @@ cond_broadcast (struct condition *cond, struct lock *lock)
 
   while (!list_empty (&cond->waiters))
     cond_signal (cond, lock);
+}
+
+// Additionally implemented part for semaphore scheduling
+bool semaphore_priority_cmp(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) 
+{
+  struct semaphore_elem *semaa = list_entry(a,struct semaphore_elem, elem);
+  struct semaphore_elem *semab = list_entry(b,struct semaphore_elem, elem);
+  // Condition variable을 기다리는 semaphore list를 가져온다.
+    
+  struct list_elem *semaa_e = list_begin(&(semaa->semaphore.waiters));
+  struct list_elem *semab_e = list_begin(&(semab->semaphore.waiters));
+  
+  return list_entry(semaa_e, struct thread, elem)->priority > list_entry (semab_e, struct thread, elem)->priority;
 }
