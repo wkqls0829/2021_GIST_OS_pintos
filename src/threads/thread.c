@@ -217,6 +217,9 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  // 새로 만들어진 thread의 priority가 높은 경우 처리
+  test_max_priority();  
+
   return tid;
 }
 
@@ -253,7 +256,8 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  /* FIFO 방식인 list_push_back (&ready_list, &t->elem); 제거 */ 
+  list_insert_ordered (&ready_list, &t->elem, &thread_priority_cmp, 0);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -323,8 +327,10 @@ thread_yield (void)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+  if (cur != idle_thread) {
+    /* FIFO 방식인 list_push_back (&ready_list, &t->elem); 제거 */
+    list_insert_ordered (&ready_list, &cur->elem, &thread_priority_cmp, 0);
+  }
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -352,6 +358,11 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+  refresh_priority();
+  
+  /* thread의 priority가 변경되었을 때 이를 반영하기 위해 test_max_priority함수를 실행시킨다. */
+  test_max_priority();
+
 }
 
 /* Returns the current thread's priority. */
@@ -658,6 +669,8 @@ void thread_awake(int64_t tick){
   }
 }
 
+/* added for priority donation */
+
 void donate_priority(){
     struct thread *t = thread_current();
     struct thread *t_ptr = t;
@@ -671,7 +684,7 @@ void free_lock(struct lock*){
     struct thread *t = thread_current();
     struct list_elem *e = list_begin(&t->donations);
 
-    for (e ; e!= list_end((t.donations));){
+    for (e ; e!= list_end((&t->donations));){
         struct thread *donation_owner = list_entry(e, struct thread, donator);
         if (donation_owner->wait_for_lock == lock){
             e = list_remove(e);
@@ -685,7 +698,6 @@ void free_lock(struct lock*){
 void refresh_priority(){
     struct thread *t = thread_current();
     t->priority = t->original_priority;
-
     if (list_empty(&t->donated) == false){
         list_sort(&t->donated, &cmp_priority, NULL);
         struct thread *highest;
@@ -695,3 +707,20 @@ void refresh_priority(){
         }
     }
 }
+
+
+/* Additionally implemented for priority scheduling*/
+void test_max_priority(void)
+{
+  if(!list_empty (&ready_list) && thread_current()->priority < list_entry(list_front(&ready_list), struct thread, elem)->priority){
+    thread_yield();
+  }
+}
+
+/* Additionally implemented for priority scheduling*/
+bool thread_priority_cmp(const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) 
+{
+  return list_entry(a, struct thread, elem)->priority > list_entry (b, struct thread, elem)->priority;
+// 내림차순 정렬을 위해 비교 함수를 만들어준다. 이때 list_insert_ordered() 함수에서 list_less_func *less에 들어가는 것을 알 수 있다. 
+}
+
