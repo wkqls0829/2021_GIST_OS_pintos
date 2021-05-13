@@ -478,6 +478,11 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
+
+  /* priority donation variables init*/
+  t->original_priority = priority;
+  list_init(&t->donated);
+  t->wait_for_lock = NULL;
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
@@ -653,4 +658,40 @@ void thread_awake(int64_t tick){
   }
 }
 
+void donate_priority(){
+    struct thread *t = thread_current();
+    struct thread *t_ptr = t;
+    while(t_ptr->wait_for_lock != NULL){
+        t_ptr = t_ptr->wait_for_lock->holder;
+        t_ptr->priority = t->priority;
+    }
+}
 
+void free_lock(struct lock*){
+    struct thread *t = thread_current();
+    struct list_elem *e = list_begin(&t->donations);
+
+    for (e ; e!= list_end((t.donations));){
+        struct thread *donation_owner = list_entry(e, struct thread, donator);
+        if (donation_owner->wait_for_lock == lock){
+            e = list_remove(e);
+        }
+        else {
+            e = list_next(e);
+        }
+    }
+}
+
+void refresh_priority(){
+    struct thread *t = thread_current();
+    t->priority = t->original_priority;
+
+    if (list_empty(&t->donated) == false){
+        list_sort(&t->donated, &cmp_priority, NULL);
+        struct thread *highest;
+        highest = list_entry(list_front(&t->donated), struct thread, donator);
+        if (highest->priority > t->priority) {
+            t->priority = highest->priority;
+        }
+    }
+}

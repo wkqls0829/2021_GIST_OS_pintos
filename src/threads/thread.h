@@ -96,6 +96,12 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+    /* priority donation variables */
+    int original_priority;
+    struct list donated;
+    struct list_elems donator;
+    struct lock * wait_for_lock;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -146,5 +152,10 @@ void set_next_wakeup_tick(int64_t ticks);
 int64_t get_next_wakeup_tick(void);
 void thread_sleep(int64_t ticks); 
 void thread_awake(int64_t ticks);
+
+/* functions for priority donations */
+void donate_priority();
+void free_lock(struct lock*);
+void refresh_priority();
 
 #endif /* threads/thread.h */
