@@ -38,8 +38,13 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
+  // hw3 problem 2: parse process name
+  char *token = NULL;
+  char *next_ptr;
+  token = strtok_r(file_name, " ", &next_ptr);
+
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  tid = thread_create (token, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
   return tid;
@@ -195,7 +200,7 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+static bool setup_stack (void **esp, int argc, char** argv);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -220,6 +225,26 @@ load (const char *file_name, void (**eip) (void), void **esp)
   if (t->pagedir == NULL) 
     goto done;
   process_activate ();
+
+  // HW3 problem 2 : parse cmd line
+  char* fn;
+  char* args[128];
+  char* next_ptr;
+  char* token;
+  int token_count = 1;
+
+  fn = palloc_get_page(0);
+  if(fn==NULL) {
+    goto done;
+  }
+  strlcpy(fn, file_name, PGSIZE);
+  token = strtok_r(fn, " ", &next_ptr);
+  args[0] = token;
+  while(token != NULL) {
+    token = strtok_r(NULL, " ", &next_ptr);
+    args[token_count++] = token;
+  }
+
 
   /* Open executable file. */
   file = filesys_open (file_name);
@@ -302,7 +327,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack(esp, token_count - 1, args))
     goto done;
 
   /* Start address. */
@@ -427,20 +452,63 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp) 
+setup_stack (void **esp, int argc, char** argv) 
 {
   uint8_t *kpage;
   bool success = false;
 
+	// HW3 problem 2: variable initiation
+	int i;
+	char *word_address[128];
+
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
   if (kpage != NULL) 
-    {
+		{
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success)
+      if (success) {
         *esp = PHYS_BASE;
-      else
-        palloc_free_page (kpage);
-    }
+
+				// HW3 problem 2 : passing args
+
+				// argv[i][...] stack argv strings
+				for(i = argc-1; i >= 0; i--){
+					*esp = *esp - (strlen(argv[i]) + 1);
+					word_address[i] = (uint32_t *)*esp;
+					memcpy(*esp, argv[i], strlen(argv[i]) + 1);
+				}
+
+				// align words
+				while ((PHYS_BASE - *esp)%4 != 0) {
+					*esp -= sizeof(uint8_t);
+					**(uint8_t **)esp = 0;
+				}
+
+				// stack NULL
+				*esp = *esp - 4;
+				*(int *)*esp = 0;
+
+				// argv[i] stack argv addresssses
+				for(i = argc-1; i >= 0; i--) {
+					*esp = *esp - 4;
+					*(uint32_t **)*esp = word_address[i];
+				}
+
+				// stack argv
+				*esp -= 4;
+				*((uint32_t **)*esp) = *esp + 4;
+
+				// stack argc
+				*esp -= 4;
+				*((int *) *esp) = argc;
+
+				// stack return address
+				// fuck you
+				*esp -= 4;
+				*((int *) *esp) = 0;
+			}
+			else
+				palloc_free_page (kpage);
+		}
   return success;
 }
 
