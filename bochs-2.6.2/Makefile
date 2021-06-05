@@ -59,7 +59,7 @@ DLXLINUX_TAR=dlxlinux4.tar.gz
 DLXLINUX_TAR_URL=http://bochs.sourceforge.net/guestos/$(DLXLINUX_TAR)
 DLXLINUX_ROMFILE=BIOS-bochs-latest
 GUNZIP=gunzip
-WGET=not_found
+WGET=wget
 SED=sed
 MKDIR=mkdir
 RMDIR=rmdir
@@ -81,7 +81,7 @@ srcdir = .
 
 SHELL = /bin/bash
 
-MAKE=make
+
 
 CC = gcc
 CXX = g++

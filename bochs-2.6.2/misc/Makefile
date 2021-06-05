@@ -26,7 +26,7 @@
 
 SHELL = /bin/bash
 
-MAKE=make
+
 
 CC = gcc
 CXX = g++

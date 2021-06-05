@@ -11,7 +11,7 @@ prefix          = /usr/local
 srcdir          = .
 docdir          = $(prefix)/share/doc/bochs
 DOCBOOK2HTML = not_found
-WGET = not_found
+WGET = wget
 TARGZ = bochsdoc.tar.gz
 RENDERED_DOC_URL = http://bochs.sf.net/doc/docbook/$(TARGZ)
 
