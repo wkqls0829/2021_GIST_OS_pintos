@@ -89,6 +89,7 @@ struct thread
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
+
 	
     /*Set the wakeup_tick for checking which threads going to be unblocked*/    
     int64_t wakeup_tick;
@@ -98,7 +99,11 @@ struct thread
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
-    uint32_t *pagedir;                  /* Page directory. */
+	
+	// exit_code 변수를 thread 구조체 안에 선언하여 자체적으로 소유하고 있게 한다.
+	int exit_code;
+
+	uint32_t *pagedir;                  /* Page directory. */
 #endif
 
     /* Owned by thread.c. */
